@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: neuralmigrate-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn main:app -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
+    plan: free
+    envVars:
+      # LLM — Groq free tier
+      - key: LLM_PROVIDER
+        value: groq
+      - key: GROQ_API_KEY
+        sync: false          # Set this in Render dashboard
+      - key: GROQ_MODEL
+        value: llama3-8b-8192
+
+      # Embeddings — HuggingFace (no key needed)
+      - key: EMBEDDING_PROVIDER
+        value: huggingface
+      - key: HF_EMBEDDING_MODEL
+        value: all-MiniLM-L6-v2
+      - key: EMBEDDING_DIM
+        value: "384"
+
+      # Neo4j Aura
+      - key: NEO4J_URI
+        sync: false          # Set in Render dashboard
+      - key: NEO4J_USER
+        value: neo4j
+      - key: NEO4J_PASSWORD
+        sync: false          # Set in Render dashboard
+
+      # Neon PostgreSQL
+      - key: PG_DSN
+        sync: false          # Set in Render dashboard
+
+      # Pipeline
+      - key: MAX_ITERATIONS
+        value: "3"
+
+      # CORS — set to your Vercel URL
+      - key: ALLOWED_ORIGINS
+        sync: false          # Set in Render dashboard
+
+    healthCheckPath: /health
+    autoDeploy: true

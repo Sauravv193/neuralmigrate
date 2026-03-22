@@ -1,0 +1,27 @@
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F5F0E8;--cream-dark:#EDE7D9;--cream-darker:#E0D8C8;
+  --parchment:#FAF7F2;
+  --forest:#1C3A2F;--forest-mid:#2D5445;--forest-light:#3D6B58;
+  --forest-faint:rgba(28,58,47,0.06);--forest-faint2:rgba(28,58,47,0.12);
+  --amber:#C8701A;--amber-light:#E8943A;--rust:#9B3D1A;
+  --green-ok:#2D6A4F;--red-err:#9B1A1A;
+  --ink:#1A1612;--ink-mid:#3D3530;--ink-soft:#6B6058;--ink-faint:#9B9088;
+  --border:rgba(28,58,47,0.14);--border-strong:rgba(28,58,47,0.25);
+  --shadow-sm:0 1px 3px rgba(26,22,18,0.08),0 1px 2px rgba(26,22,18,0.04);
+  --shadow-md:0 4px 16px rgba(26,22,18,0.10),0 2px 6px rgba(26,22,18,0.06);
+  --shadow-lg:0 16px 48px rgba(26,22,18,0.13),0 4px 12px rgba(26,22,18,0.07);
+  --font-display:'Fraunces',Georgia,serif;
+  --font-body:'Instrument Sans',system-ui,sans-serif;
+  --font-mono:'Geist Mono','Fira Code',monospace;
+}
+html{scroll-behavior:smooth;-webkit-font-smoothing:antialiased}
+body{background:var(--parchment);color:var(--ink);font-family:var(--font-body);font-size:16px;line-height:1.65}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--cream-darker);border-radius:3px}
+::selection{background:rgba(200,112,26,0.2)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.6;transform:scale(0.85)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}

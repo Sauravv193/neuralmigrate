@@ -1,0 +1,63 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# NeuralMigrate — Local Development Infrastructure (OPTIONAL)
+#
+# For Option A (recommended): You do NOT need this file.
+# Use free cloud services instead:
+#   Neo4j   → https://neo4j.com/cloud/aura  (AuraDB Free)
+#   Postgres → https://neon.tech             (free, pgvector supported)
+#
+# Only use this file if you prefer to run databases locally.
+# Requires Docker Desktop — https://docker.com
+# ─────────────────────────────────────────────────────────────────────────────
+
+version: "3.9"
+
+services:
+
+  # ── Neo4j (Graph Database) ──────────────────────────────────────────────────
+  neo4j:
+    image: neo4j:5.20-community
+    container_name: neuralmigrate_neo4j
+    restart: unless-stopped
+    ports:
+      - "7474:7474"   # Browser UI: http://localhost:7474
+      - "7687:7687"   # Bolt protocol
+    environment:
+      NEO4J_AUTH: "neo4j/password"
+      NEO4J_PLUGINS: '["apoc"]'
+      NEO4J_dbms_security_procedures_unrestricted: "apoc.*"
+      NEO4J_dbms_memory_heap_initial__size: "512m"
+      NEO4J_dbms_memory_heap_max__size: "1g"
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "password", "RETURN 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
+  # ── PostgreSQL + pgvector ───────────────────────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: neuralmigrate_postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: ragdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init_postgres.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d ragdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+volumes:
+  neo4j_data:
+  postgres_data:
