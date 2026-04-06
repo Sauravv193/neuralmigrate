@@ -88,20 +88,22 @@ def build_embedding_client(provider: str | None = None) -> Any:
     """
     provider = provider or os.getenv("EMBEDDING_PROVIDER", "huggingface")
 
-    if provider in ("huggingface", "groq", "huggingface-fallback"):
-        # Groq has no embedding API — always use HuggingFace sentence-transformers
-        if provider == "groq":
-            logger.info("Groq has no embedding API — using HuggingFace (all-MiniLM-L6-v2)")
-        model_name = os.getenv("HF_EMBEDDING_MODEL", "all-MiniLM-L6-v2")
-        logger.info("Loading HuggingFace model: %s (first run ~90MB download)", model_name)
+  if provider in ("huggingface", "groq", "huggingface-fallback"):
+    if provider == "groq":
+        logger.info("Groq has no embedding API — using FastEmbed (lightweight)")
+    model_name = os.getenv("HF_EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+    logger.info("Loading FastEmbed model: %s (~50MB, ONNX, no torch)", model_name)
+    try:
+        from langchain_community.embeddings import FastEmbedEmbeddings  # type: ignore
+        return FastEmbedEmbeddings(model_name=model_name)
+    except Exception as e:
+        logger.warning("FastEmbed failed (%s), falling back to HuggingFace", e)
         try:
-            # Prefer the updated langchain-huggingface package (no deprecation warning)
             from langchain_huggingface import HuggingFaceEmbeddings  # type: ignore
         except ImportError:
-            # Fall back to langchain-community if langchain-huggingface not installed
             from langchain_community.embeddings import HuggingFaceEmbeddings  # type: ignore
         return HuggingFaceEmbeddings(
-            model_name=model_name,
+            model_name="all-MiniLM-L6-v2",
             model_kwargs={"device": "cpu"},
             encode_kwargs={"normalize_embeddings": True},
         )
