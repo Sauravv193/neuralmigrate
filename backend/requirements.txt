@@ -15,9 +15,7 @@ langgraph>=0.1.0,<0.3.0
 # ── LLM — FREE ───────────────────────────────────────────────
 groq>=0.9.0,<1.0.0                # Groq free tier (llama3-8b-8192)
 
-# ── Embeddings — FREE, ~90MB, CPU only ───────────────────────
-sentence-transformers>=2.7.0,<4.0.0   # all-MiniLM-L6-v2 (384-dim)
-# Downloads the model on first run — cached in ~/.cache/huggingface
+fastembed>=0.3.0,<1.0.0
 
 # ── LLM — optional paid providers ────────────────────────────
 openai>=1.30.0,<2.0.0             # OpenAI + DeepSeek (OpenAI-compatible)
