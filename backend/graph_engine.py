@@ -1,5 +1,4 @@
 """
-graph_engine.py
 LangGraph workflow + LLM factory supporting FREE-TIER providers:
   - Groq        (free cloud API — llama3-8b-8192, recommended)
   - HuggingFace (free embeddings via sentence-transformers, ~90MB)
@@ -25,12 +24,6 @@ logger = logging.getLogger(__name__)
 def build_llm(provider: str = "groq", **kwargs: Any) -> BaseChatModel:
     """
     Build a LangChain chat model. All providers except OpenAI are free.
-
-    Providers:
-      groq    — Free tier at console.groq.com (llama3-8b-8192 / mixtral-8x7b)
-      ollama  — Local, zero cost (codellama:7b recommended)
-      openai  — Paid (gpt-4o)
-      deepseek— Cheap alternative
     """
     provider = provider.lower()
 
@@ -77,36 +70,32 @@ def build_llm(provider: str = "groq", **kwargs: Any) -> BaseChatModel:
 def build_embedding_client(provider: str | None = None) -> Any:
     """
     Build an embedding client.
-
-    Default (Option A — recommended, free, no Docker/Ollama needed):
-      EMBEDDING_PROVIDER=huggingface  ->  sentence-transformers all-MiniLM-L6-v2
-      ~90MB download on first run, CPU-only, completely free.
-
-    Alternatives:
-      ollama  — local Ollama daemon (requires Docker or native install)
-      openai  — paid OpenAI text-embedding-3-small
     """
     provider = provider or os.getenv("EMBEDDING_PROVIDER", "huggingface")
 
-  if provider in ("huggingface", "groq", "huggingface-fallback"):
-    if provider == "groq":
-        logger.info("Groq has no embedding API — using FastEmbed (lightweight)")
-    model_name = os.getenv("HF_EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
-    logger.info("Loading FastEmbed model: %s (~50MB, ONNX, no torch)", model_name)
-    try:
-        from langchain_community.embeddings import FastEmbedEmbeddings  # type: ignore
-        return FastEmbedEmbeddings(model_name=model_name)
-    except Exception as e:
-        logger.warning("FastEmbed failed (%s), falling back to HuggingFace", e)
+    # FIXED INDENTATION BELOW (Lines 89-128)
+    if provider in ("huggingface", "groq", "huggingface-fallback"):
+        if provider == "groq":
+            logger.info("Groq has no embedding API — using FastEmbed (lightweight)")
+        
+        model_name = os.getenv("HF_EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5")
+        logger.info("Loading FastEmbed model: %s (~50MB, ONNX, no torch)", model_name)
+        
         try:
-            from langchain_huggingface import HuggingFaceEmbeddings  # type: ignore
-        except ImportError:
-            from langchain_community.embeddings import HuggingFaceEmbeddings  # type: ignore
-        return HuggingFaceEmbeddings(
-            model_name="all-MiniLM-L6-v2",
-            model_kwargs={"device": "cpu"},
-            encode_kwargs={"normalize_embeddings": True},
-        )
+            from langchain_community.embeddings import FastEmbedEmbeddings  # type: ignore
+            return FastEmbedEmbeddings(model_name=model_name)
+        except Exception as e:
+            logger.warning("FastEmbed failed (%s), falling back to HuggingFace", e)
+            try:
+                from langchain_huggingface import HuggingFaceEmbeddings  # type: ignore
+            except ImportError:
+                from langchain_community.embeddings import HuggingFaceEmbeddings  # type: ignore
+            
+            return HuggingFaceEmbeddings(
+                model_name="all-MiniLM-L6-v2",
+                model_kwargs={"device": "cpu"},
+                encode_kwargs={"normalize_embeddings": True},
+            )
 
     elif provider == "ollama":
         from langchain_community.embeddings import OllamaEmbeddings  # type: ignore
@@ -128,6 +117,7 @@ def build_embedding_client(provider: str | None = None) -> Any:
             from langchain_huggingface import HuggingFaceEmbeddings  # type: ignore
         except ImportError:
             from langchain_community.embeddings import HuggingFaceEmbeddings  # type: ignore
+        
         return HuggingFaceEmbeddings(
             model_name="all-MiniLM-L6-v2",
             model_kwargs={"device": "cpu"},
